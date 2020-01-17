@@ -62,7 +62,7 @@ if($badblood -eq 'badblood'){
     $I++
     .($basescriptPath + '\AD_Users_Create\CreateUsers.ps1')
     do{createuser
-        Write-Progress -Activity "Random Stuff into A domain - Creating $int Users" -Status "Progress:" -PercentComplete ($x/$int*100)
+        Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfUsers Users" -Status "Progress:" -PercentComplete ($x/$NumOfUsers*100)
     $x++
     }while($x -lt $NumOfUsers)
     
@@ -75,7 +75,7 @@ if($badblood -eq 'badblood'){
     
     do{
         Creategroup
-        Write-Progress -Activity "Random Stuff into A domain - Creating $int Groups" -Status "Progress:" -PercentComplete ($x/$int*100)
+        Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfGroups Groups" -Status "Progress:" -PercentComplete ($x/$NumOfGroups*100)
     
     $x++
     }while($x -lt $NumOfGroups)
@@ -86,7 +86,7 @@ if($badblood -eq 'badblood'){
     .($basescriptPath + '\AD_Computers_Create\CreateComputers.ps1')
     $I++
     do{
-        Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfComps computers" -Status "Progress:" -PercentComplete ($x/$int*100)
+        Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfComps computers" -Status "Progress:" -PercentComplete ($x/$NumOfComps*100)
         createcomputer
     $x++
     }while($x -lt $NumOfComps)
