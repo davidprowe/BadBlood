@@ -132,9 +132,9 @@ Function CreateComputer{
                             if ($PSBoundParameters.ContainsKey('Debug') -eq $true)
                                 {write-host "Workstation Type 0 chosen. Desktop value selected"}
                                         $ouLocation = 'OU=Desktops,OU=Technology,' + $dnstring
-                                            #test for OU existence, if not exist, put in Central Admin UIS
+                                            #test for OU existence, if not exist, put in  Admin OU
                                             try{Get-ADOrganizationalUnit $oulocation|Out-Null}
-                                            catch{$OUlocation = 'OU=Desktops,OU=Technology,OU=UIS,OU=Central Administration,' + (Get-ADDomain).distinguishedname}
+                                            catch{$OUlocation = 'OU=Admin,' + (Get-ADDomain).distinguishedname}
 
                                                     }
                         elseif($WorkstationType -eq 1){ #laptop workflow
@@ -142,9 +142,9 @@ Function CreateComputer{
                                 {write-host "Workstation Type 1 chosen. Laptop value selected"}
                         
                                         $ouLocation = 'OU=Laptops,OU=Technology,' + $dnstring
-                                        #test for OU existence, if not exist, put in Central Admin UIS
+                                        #test for OU existence, if not exist, put in  Admin OU
                                         try{Get-ADOrganizationalUnit $oulocation}
-                                        catch{$OUlocation = 'OU=Desktops,OU=Technology,OU=UIS,OU=Central Administration,' + (Get-ADDomain).distinguishedname}
+                                        catch{$OUlocation = 'OU=Admin,' + (Get-ADDomain).distinguishedname}
                 
                                                     
                                                         }
@@ -155,14 +155,12 @@ Function CreateComputer{
                                     
                                         $ouLocation = 'OU=Desktops,OU=Technology,' + $dnstring
                                         try{Get-ADOrganizationalUnit $oulocation}
-                                        #test for OU existence, if not exist, put in Central Admin UIS
-                                            catch{$OUlocation = 'OU=Desktops,OU=Technology,OU=UIS,OU=Central Administration,' + (Get-ADDomain).distinguishedname}
+                                        #test for OU existence, if not exist, put in  Admin OU
+                                            catch{$OUlocation = 'OU=Admin,' + (Get-ADDomain).distinguishedname}
 
                             }
                             
-                            if ($sphadmin -eq $true){
-                            $OUlocation = 'OU=Desktops,OU=Technology,OU=SPH,OU=Schools,' + (Get-ADDomain).distinguishedname
-                            }
+                            
 
                             }
             #=========================================
@@ -186,7 +184,7 @@ Function CreateComputer{
             #=========================================
             <#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#> 
               $OUsAll = get-adobject -Filter {objectclass -eq 'organizationalunit'} -ResultSetSize 300
-              $ousall += get-adobject -Filter {objectclass -eq 'container'} -ResultSetSize 300|where-object -Property objectclass -eq 'container'|where-object -Property distinguishedname -notlike "*}*"|where-object -Property distinguishedname -notlike  "*DomainUpdates*"
+              # removing containers right now. will add later $ousall += get-adobject -Filter {objectclass -eq 'container'} -ResultSetSize 300|where-object -Property objectclass -eq 'container'|where-object -Property distinguishedname -notlike "*}*"|where-object -Property distinguishedname -notlike  "*DomainUpdates*"
 
                     $ouLocation = (Get-Random $OUsAll).distinguishedname
                     if ($PSBoundParameters.ContainsKey('Debug') -eq $true)
@@ -284,7 +282,9 @@ Function CreateComputer{
                                 write-host "New-ADComputer -server $setdc -Name $CompName -DisplayName $CompName -Enabled $true -path $ou -ManagedBy $manager -owner $owner -SAMAccountName $sam"
                                 write-host `n}
                                 $description = 'Created with secframe.com/badblood.'
-            New-ADComputer -server $setdc -Name $CompName -DisplayName $CompName -Enabled $true -path $ou -ManagedBy $manager -SAMAccountName $sam -Description $Description
+            #something is up with system containers i  pull in earlier.  try the random path.  if doesnt work set to default computer container
+                                tyr{New-ADComputer -server $setdc -Name $CompName -DisplayName $CompName -Enabled $true -path $ou -ManagedBy $manager -SAMAccountName $sam -Description $Description}
+                                catch{New-ADComputer -server $setdc -Name $CompName -DisplayName $CompName -Enabled $true -ManagedBy $manager -SAMAccountName $sam -Description $Description}
 
 
     #Check for machine.  if it does not exist, skip this next parameter setting stuff

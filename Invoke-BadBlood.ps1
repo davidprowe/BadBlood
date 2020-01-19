@@ -24,7 +24,7 @@ function Get-ScriptDirectory {
 $basescriptPath = Get-ScriptDirectory
 $totalscripts = 7
 
-$i = 1
+$i = 0
 cls
 write-host "Welcome to BadBlood"
 Write-Host  'Press any key to continue...';
