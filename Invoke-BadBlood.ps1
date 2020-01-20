@@ -56,6 +56,7 @@ if($badblood -eq 'badblood'){
     Write-Progress -Activity "Random Stuff into A domain - Creating OUs" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     $I++
     
+    write-host "Creating Users on Domain" -ForegroundColor Green
     $NumOfUsers = 1000..5000|Get-random #this number is the random number of users to create on a domain.  Todo: Make process createusers.ps1 in a parallel loop
     $X=1
     Write-Progress -Activity "Random Stuff into A domain - Creating Users" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
@@ -66,7 +67,7 @@ if($badblood -eq 'badblood'){
     $x++
     }while($x -lt $NumOfUsers)
     
-    
+    write-host "Creating Groups on Domain" -ForegroundColor Green
     $NumOfGroups = 100..500|Get-random 
     $X=1
     Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfGroups Groups" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
@@ -80,6 +81,7 @@ if($badblood -eq 'badblood'){
     $x++
     }while($x -lt $NumOfGroups)
     
+    write-host "Creating Computers on Domain" -ForegroundColor Green
     $NumOfComps = 50..150|Get-random 
     $X=1
     Write-Progress -Activity "Random Stuff into A domain - Creating Computers" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
@@ -92,10 +94,12 @@ if($badblood -eq 'badblood'){
     }while($x -lt $NumOfComps)
     
     $I++
+    write-host "Creating Permissions on Domain" -ForegroundColor Green
     .($basescriptPath + '\AD_Permissions_Randomizer\GenerateRandomPermissions.ps1')
     Write-Progress -Activity "Random Stuff into A domain - Creating OUs" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     
     $I++
+    write-host "Nesting objects into groups on Domain" -ForegroundColor Green
     .($basescriptPath + '\AD_Groups_Create\AddRandomToGroups.ps1')
     Write-Progress -Activity "Random Stuff into A domain - Adding Stuff to Stuff and Things" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
 }
