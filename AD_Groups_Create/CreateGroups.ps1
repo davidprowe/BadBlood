@@ -37,7 +37,7 @@ Function CreateGroup{
     }
     $groupscriptPath = Get-ScriptDirectory
            
-    $application = try{(get-content($groupscriptPath + '\hotmail.txt')|get-random).substring(0,9)}catch{(get-content($groupscriptPath + '\hotmail.txt')|get-random).substring(0,3) }
+    $application = try{(get-content($groupscriptPath + '\hotmail.txt')|get-random).substring(0,9)} catch{(get-content($groupscriptPath + '\hotmail.txt')|get-random).substring(0,3) }
     $functionint = 1..100|Get-random  
     if($functionint -le 25){$function = 'admingroup'}else{$function = 'distlist'}              
     $GroupNameFull = $Groupnameprefix + '-'+$Application+ '-'+$Function
