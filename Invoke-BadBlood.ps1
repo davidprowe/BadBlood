@@ -38,6 +38,7 @@ $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 Write-Host  'Press any key to continue...';
 write-host "You are responsible for how you use this tool. It is intended for personal use only"
 write-host "This is not intended for commercial use"
+Write-Host  'Press any key to continue...';
 write-host "`n"
 $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 write-host "`n"
