@@ -45,7 +45,7 @@ $badblood = Read-Host -Prompt "Type `'badblood`' to deploy some randomness into 
 $badblood.tolower()
 if($badblood -ne 'badblood'){exit}
 if($badblood -eq 'badblood'){
-
+   $Domain = Get-addomain
     Write-Progress -Activity "Random Stuff into A domain" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
 
 
@@ -55,14 +55,16 @@ if($badblood -eq 'badblood'){
     .($basescriptPath + '\AD_OU_CreateStructure\CreateOUStructure.ps1')
     Write-Progress -Activity "Random Stuff into A domain - Creating OUs" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     $I++
-    
+    $ousAll = Get-adorganizationalunit -filter *
     write-host "Creating Users on Domain" -ForegroundColor Green
     $NumOfUsers = 1000..5000|Get-random #this number is the random number of users to create on a domain.  Todo: Make process createusers.ps1 in a parallel loop
     $X=1
     Write-Progress -Activity "Random Stuff into A domain - Creating Users" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     $I++
     .($basescriptPath + '\AD_Users_Create\CreateUsers.ps1')
+    $createuserscriptpath = $basescriptPath + '\AD_Users_Create\'
     do{createuser
+      createuser -Domain $Domain -OUList $ousAll -ScriptDir $createuserscriptpath
         Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfUsers Users" -Status "Progress:" -PercentComplete ($x/$NumOfUsers*100)
     $x++
     }while($x -lt $NumOfUsers)
@@ -96,7 +98,7 @@ if($badblood -eq 'badblood'){
     $I++
     write-host "Creating Permissions on Domain" -ForegroundColor Green
     .($basescriptPath + '\AD_Permissions_Randomizer\GenerateRandomPermissions.ps1')
-    Write-Progress -Activity "Random Stuff into A domain - Creating OUs" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
+    Write-Progress -Activity "Random Stuff into A domain - Creating Random Permissions" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     
     $I++
     write-host "Nesting objects into groups on Domain" -ForegroundColor Green

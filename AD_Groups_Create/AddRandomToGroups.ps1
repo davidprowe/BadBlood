@@ -17,7 +17,7 @@ $AddUserstoGroups = get-random -count $UsersInGroupCount -InputObject $allUsers
 
 Foreach ($user in $AddUserstoGroups){
     #get how many groups
-    $num = 1..15|Get-Random
+    $num = 1..10|Get-Random
     $n = 0
     do{
         $randogroup = $allgroups|Get-Random
@@ -33,7 +33,7 @@ $AddGroupstoGroups = get-random -count $GroupsInGroupCount -InputObject $allGrou
 
 Foreach ($group in $AddGroupstoGroups){
     #get how many groups
-    $num = 1..10|Get-Random
+    $num = 1..2|Get-Random
     $n = 0
     do{
         $randogroup = $allgroups|Get-Random
