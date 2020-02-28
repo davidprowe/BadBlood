@@ -63,7 +63,7 @@ if($badblood -eq 'badblood'){
     $I++
     .($basescriptPath + '\AD_Users_Create\CreateUsers.ps1')
     $createuserscriptpath = $basescriptPath + '\AD_Users_Create\'
-    do{createuser
+    do{
       createuser -Domain $Domain -OUList $ousAll -ScriptDir $createuserscriptpath
         Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfUsers Users" -Status "Progress:" -PercentComplete ($x/$NumOfUsers*100)
     $x++
