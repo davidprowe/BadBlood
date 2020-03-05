@@ -68,6 +68,7 @@ if($badblood -eq 'badblood'){
         Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfUsers Users" -Status "Progress:" -PercentComplete ($x/$NumOfUsers*100)
     $x++
     }while($x -lt $NumOfUsers)
+    $AllUsers = Get-aduser -Filter *
     
     write-host "Creating Groups on Domain" -ForegroundColor Green
     $NumOfGroups = 100..500|Get-random 
@@ -82,7 +83,8 @@ if($badblood -eq 'badblood'){
     
     $x++
     }while($x -lt $NumOfGroups)
-    
+    $Grouplist = Get-ADGroup -Filter { GroupCategory -eq "Security" -and GroupScope -eq "Global"  } -Properties isCriticalSystemObject
+    $LocalGroupList =  Get-ADGroup -Filter { GroupScope -eq "domainlocal"  } -Properties isCriticalSystemObject
     write-host "Creating Computers on Domain" -ForegroundColor Green
     $NumOfComps = 50..150|Get-random 
     $X=1
@@ -94,14 +96,18 @@ if($badblood -eq 'badblood'){
         createcomputer
     $x++
     }while($x -lt $NumOfComps)
+    $Complist = get-adcomputer -filter *
     
     $I++
     write-host "Creating Permissions on Domain" -ForegroundColor Green
-    .($basescriptPath + '\AD_Permissions_Randomizer\GenerateRandomPermissions.ps1')
     Write-Progress -Activity "Random Stuff into A domain - Creating Random Permissions" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
+    .($basescriptPath + '\AD_Permissions_Randomizer\GenerateRandomPermissions.ps1')
+    
     
     $I++
     write-host "Nesting objects into groups on Domain" -ForegroundColor Green
     .($basescriptPath + '\AD_Groups_Create\AddRandomToGroups.ps1')
     Write-Progress -Activity "Random Stuff into A domain - Adding Stuff to Stuff and Things" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
+    AddRandomToGroups -Domain $Domain -Userlist $AllUsers -GroupList $Grouplist -LocalGroupList $LocalGroupList -complist $Complist
+    
 }
