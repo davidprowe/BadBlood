@@ -10,6 +10,7 @@
     .NOTES
        Written by David Rowe, Blog secframe.com/blog
        Twitter : @davidprowe
+       Domain Size Selector by HuskyHacks
        I take no responsibility for any issues caused by this script.  I am not responsible if this gets run in a production domain.  
     .FUNCTIONALITY
        Adds a ton of stuff into a domain.  Adds Users, Groups, OUs, Computers, and a vast amount of ACLs in a domain.
@@ -90,8 +91,6 @@ if($badblood -ne 'badblood'){exit}
 if($badblood -eq 'badblood'){
    $Domain = Get-addomain
     Write-Progress -Activity "Random Stuff into A domain" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
-
-
     .($basescriptPath + '\AD_LAPS_Install\InstallLAPSSchema.ps1')
     Write-Progress -Activity "Random Stuff into A domain: Install LAPS" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     $I++
@@ -100,11 +99,7 @@ if($badblood -eq 'badblood'){
     $I++
     $ousAll = Get-adorganizationalunit -filter *
     write-host "Creating Users on Domain" -ForegroundColor Green
-    
-    
-    $NumOfUsers = $userSize|Get-random #this number is the random number of users to create on a domain.  Todo: Make process createusers.ps1 in a parallel loop
-   
-   
+    $NumOfUsers = $userSize #this number is the random number of users to create on a domain.  Todo: Make process createusers.ps1 in a parallel loop
     $X=1
     Write-Progress -Activity "Random Stuff into A domain - Creating Users" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     $I++
@@ -116,13 +111,8 @@ if($badblood -eq 'badblood'){
     $x++
     }while($x -lt $NumOfUsers)
     $AllUsers = Get-aduser -Filter *
-    
     write-host "Creating Groups on Domain" -ForegroundColor Green
-    
-    
-    $NumOfGroups = $groupSize|Get-random 
-    
-    
+    $NumOfGroups = $groupSize
     $X=1
     Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfGroups Groups" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     $I++
@@ -131,17 +121,12 @@ if($badblood -eq 'badblood'){
     do{
         Creategroup
         Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfGroups Groups" -Status "Progress:" -PercentComplete ($x/$NumOfGroups*100)
-    
     $x++
     }while($x -lt $NumOfGroups)
     $Grouplist = Get-ADGroup -Filter { GroupCategory -eq "Security" -and GroupScope -eq "Global"  } -Properties isCriticalSystemObject
     $LocalGroupList =  Get-ADGroup -Filter { GroupScope -eq "domainlocal"  } -Properties isCriticalSystemObject
     write-host "Creating Computers on Domain" -ForegroundColor Green
-    
-    
-    $NumOfComps = $compNum|Get-random 
-    
-    
+    $NumOfComps = $compNum
     $X=1
     Write-Progress -Activity "Random Stuff into A domain - Creating Computers" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     .($basescriptPath + '\AD_Computers_Create\CreateComputers.ps1')
