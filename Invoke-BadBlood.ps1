@@ -10,6 +10,7 @@
     .NOTES
        Written by David Rowe, Blog secframe.com/blog
        Twitter : @davidprowe
+       Domain Size Selector by HuskyHacks
        I take no responsibility for any issues caused by this script.  I am not responsible if this gets run in a production domain.  
     .FUNCTIONALITY
        Adds a ton of stuff into a domain.  Adds Users, Groups, OUs, Computers, and a vast amount of ACLs in a domain.
@@ -41,15 +42,55 @@ write-host "This is not intended for commercial use"
 Write-Host  'Press any key to continue...';
 write-host "`n"
 $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+
+Write-Host  'Please select the SIZE of the domain that you want to create.';
+Write-Host  'S - SMALL';
+Write-Host  'M - MEDIUM'
+Write-Host  'L - LARGE';
+Write-Host  'X - X-LARGE';
+
+$choices = [Management.Automation.Host.ChoiceDescription[]] @(
+  New-Object Management.Automation.Host.ChoiceDescription("&S","SMALL: 10 to 100 users, 5 to 15 groups, 10 to 30 computers.")
+  New-Object Management.Automation.Host.ChoiceDescription("&M","MEDIUM: 100 to 1000 users, 15 to 100 groups, 10 to 30 computers.")
+  New-Object Management.Automation.Host.ChoiceDescription("&L","LARGE: 1000 to 5000 users, 100 to 500 groups, 50 to 150 computers.")
+  New-Object Management.Automation.Host.ChoiceDescription("&X","X-LARGE: 5000 to 5000 users, 500 to 750 groups, 150 to 400 computers.")
+)
+$domainsize = $Host.UI.PromptForChoice("Please select a size","`n",$choices,2)
+
+if ($domainsize -ieq "0") {
+    $userSize = 10..100|Get-Random ;
+    $groupSize = 5..15|Get-Random ;
+    $compNum = 10..30|Get-Random
+   }
+
+if($domainsize -ieq "1")
+   {$userSize = 100..1000|Get-Random;
+   $groupSize = 15..100|Get-Random;
+   $compNum = 30..150|Get-Random;
+   }
+
+if($domainsize -ieq "2")
+{$userSize = 1000..5000|Get-Random;
+$groupSize = 100..500|Get-Random;
+$compNum = 50..150|Get-Random
+}
+
+ if($domainsize -ieq "3")
+{$userSize = 5000..10000|Get-Random;
+$groupSize = 500..750|Get-Random;
+$compNum = 150..400| Get-Random
+}
+
 write-host "`n"
+write-host "Domain size selected! `n Users: $userSize `n Groups: $groupSize `n Computers: $compNum"
+write-host "`n"
+
 $badblood = Read-Host -Prompt "Type `'badblood`' to deploy some randomness into a domain"
 $badblood.tolower()
 if($badblood -ne 'badblood'){exit}
 if($badblood -eq 'badblood'){
    $Domain = Get-addomain
     Write-Progress -Activity "Random Stuff into A domain" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
-
-
     .($basescriptPath + '\AD_LAPS_Install\InstallLAPSSchema.ps1')
     Write-Progress -Activity "Random Stuff into A domain: Install LAPS" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     $I++
@@ -58,7 +99,7 @@ if($badblood -eq 'badblood'){
     $I++
     $ousAll = Get-adorganizationalunit -filter *
     write-host "Creating Users on Domain" -ForegroundColor Green
-    $NumOfUsers = 1000..5000|Get-random #this number is the random number of users to create on a domain.  Todo: Make process createusers.ps1 in a parallel loop
+    $NumOfUsers = $userSize #this number is the random number of users to create on a domain.  Todo: Make process createusers.ps1 in a parallel loop
     $X=1
     Write-Progress -Activity "Random Stuff into A domain - Creating Users" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     $I++
@@ -70,9 +111,8 @@ if($badblood -eq 'badblood'){
     $x++
     }while($x -lt $NumOfUsers)
     $AllUsers = Get-aduser -Filter *
-    
     write-host "Creating Groups on Domain" -ForegroundColor Green
-    $NumOfGroups = 100..500|Get-random 
+    $NumOfGroups = $groupSize
     $X=1
     Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfGroups Groups" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     $I++
@@ -81,13 +121,12 @@ if($badblood -eq 'badblood'){
     do{
         Creategroup
         Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfGroups Groups" -Status "Progress:" -PercentComplete ($x/$NumOfGroups*100)
-    
     $x++
     }while($x -lt $NumOfGroups)
     $Grouplist = Get-ADGroup -Filter { GroupCategory -eq "Security" -and GroupScope -eq "Global"  } -Properties isCriticalSystemObject
     $LocalGroupList =  Get-ADGroup -Filter { GroupScope -eq "domainlocal"  } -Properties isCriticalSystemObject
     write-host "Creating Computers on Domain" -ForegroundColor Green
-    $NumOfComps = 50..150|Get-random 
+    $NumOfComps = $compNum
     $X=1
     Write-Progress -Activity "Random Stuff into A domain - Creating Computers" -Status "Progress:" -PercentComplete ($i/$totalscripts*100)
     .($basescriptPath + '\AD_Computers_Create\CreateComputers.ps1')
