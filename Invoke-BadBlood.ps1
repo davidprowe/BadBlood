@@ -33,7 +33,15 @@ param
    [Parameter(Mandatory = $false,
       Position = 3,
       HelpMessage = 'Supply the script directory for where this script is stored')]
-   [int32]$ComputerCount = 100
+   [int32]$ComputerCount = 100,
+   [Parameter(Mandatory = $false,
+      Position = 4,
+      HelpMessage = 'Skip the OU creation if you already have done it')]
+   [switch]$SkipOuCreation,
+   [Parameter(Mandatory = $false,
+      Position = 5,
+      HelpMessage = 'Skip the LAPS deployment if you already have done it')]
+   [switch]$SkipLapsInstall
 )
 function Get-ScriptDirectory {
    Split-Path -Parent $PSCommandPath
@@ -70,14 +78,24 @@ if ($badblood -eq 'badblood') {
    $Domain = Get-addomain
 
    # LAPS STUFF
-   Write-Progress -Activity "Random Stuff into A domain" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
-   .($basescriptPath + '\AD_LAPS_Install\InstallLAPSSchema.ps1')
-   Write-Progress -Activity "Random Stuff into A domain: Install LAPS" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   if ($PSBoundParameters.ContainsKey('SkipLapsInstall') -eq $false)
+      {
+         Write-Progress -Activity "Random Stuff into A domain" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+         .($basescriptPath + '\AD_LAPS_Install\InstallLAPSSchema.ps1')
+         Write-Progress -Activity "Random Stuff into A domain: Install LAPS" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+      }
+   else{}
+   
    $I++
 
+
    #OU Structure Creation
-   .($basescriptPath + '\AD_OU_CreateStructure\CreateOUStructure.ps1')
-   Write-Progress -Activity "Random Stuff into A domain - Creating OUs" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   if ($PSBoundParameters.ContainsKey('SkipOuCreation') -eq $false)
+      {
+         .($basescriptPath + '\AD_OU_CreateStructure\CreateOUStructure.ps1')
+         Write-Progress -Activity "Random Stuff into A domain - Creating OUs" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+      }
+   else{}
    $I++
 
    # User Creation
@@ -141,4 +159,6 @@ if ($badblood -eq 'badblood') {
    Write-Progress -Activity "Random Stuff into A domain - Adding Stuff to Stuff and Things" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    AddRandomToGroups -Domain $Domain -Userlist $AllUsers -GroupList $Grouplist -LocalGroupList $LocalGroupList -complist $Complist
     
+
+
 }
