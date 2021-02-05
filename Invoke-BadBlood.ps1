@@ -91,7 +91,7 @@ if ($badblood -eq 'badblood') {
    $createuserscriptpath = $basescriptPath + '\AD_Users_Create\'
    do {
       createuser -Domain $Domain -OUList $ousAll -ScriptDir $createuserscriptpath
-      Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfUsers Users" -Status "Progress:" -PercentComplete ($x / $NumOfUsers * 100)
+      Write-Progress -Activity "Random Stuff into A domain - Creating $UserCount Users" -Status "Progress:" -PercentComplete ($x / $UserCount * 100)
       $x++
    }while ($x -lt $UserCount)
 
@@ -100,13 +100,13 @@ if ($badblood -eq 'badblood') {
    write-host "Creating Groups on Domain" -ForegroundColor Green
 
    $x = 1
-   Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfGroups Groups" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   Write-Progress -Activity "Random Stuff into A domain - Creating $GroupCount Groups" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    $i++
    .($basescriptPath + '\AD_Groups_Create\CreateGroups.ps1')
     
    do {
       Creategroup
-      Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfGroups Groups" -Status "Progress:" -PercentComplete ($x / $NumOfGroups * 100)
+      Write-Progress -Activity "Random Stuff into A domain - Creating $GroupCount Groups" -Status "Progress:" -PercentComplete ($x / $GroupCount * 100)
       $x++
    }while ($x -lt $GroupCount)
    $Grouplist = Get-ADGroup -Filter { GroupCategory -eq "Security" -and GroupScope -eq "Global" } -Properties isCriticalSystemObject
@@ -120,7 +120,7 @@ if ($badblood -eq 'badblood') {
    .($basescriptPath + '\AD_Computers_Create\CreateComputers.ps1')
    $I++
    do {
-      Write-Progress -Activity "Random Stuff into A domain - Creating $NumOfComps computers" -Status "Progress:" -PercentComplete ($x / $NumOfComps * 100)
+      Write-Progress -Activity "Random Stuff into A domain - Creating $ComputerCount computers" -Status "Progress:" -PercentComplete ($x / $ComputerCount * 100)
       createcomputer
       $x++
    }while ($x -lt $ComputerCount)
