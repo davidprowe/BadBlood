@@ -262,6 +262,16 @@
     if($name.length -gt 20){
         $name = $name.substring(0,20)
     }
+
+    $exists = $null
+    try {
+        $exists = Get-ADUSer $name -ErrorAction Stop
+    } catch{}
+
+    if($exists){
+        return $true
+    }
+
     new-aduser -server $setdc  -Description $Description -DisplayName $name -name $name -SamAccountName $name -Surname $name -Enabled $true -Path $ouLocation -AccountPassword (ConvertTo-SecureString ($pwd) -AsPlainText -force)
     
     
@@ -279,11 +289,10 @@
     try{Set-ADUser -Identity $name -UserPrincipalName "$upn" }
     catch{}
     
+    return $false
     ################################
     #End Create User Objects
     ################################
     
     }
-    
-    
     

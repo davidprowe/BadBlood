@@ -108,9 +108,11 @@ if ($badblood -eq 'badblood') {
    .($basescriptPath + '\AD_Users_Create\CreateUsers.ps1')
    $createuserscriptpath = $basescriptPath + '\AD_Users_Create\'
    do {
-      createuser -Domain $Domain -OUList $ousAll -ScriptDir $createuserscriptpath
+      $status = createuser -Domain $Domain -OUList $ousAll -ScriptDir $createuserscriptpath
       Write-Progress -Activity "Random Stuff into A domain - Creating $UserCount Users" -Status "Progress:" -PercentComplete ($x / $UserCount * 100)
-      $x++
+      if($status -eq $false){
+          $x++
+      }
    }while ($x -lt $UserCount)
 
    #Group Creation
