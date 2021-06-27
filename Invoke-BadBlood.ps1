@@ -56,9 +56,9 @@ $totalscripts = 7
 $i = 0
 cls
 write-host "Welcome to BadBlood"
-Write-Host  'Press any key to continue...';
-write-host "`n"
 if($NonInteractive -eq $false){
+    Write-Host  'Press any key to continue...';
+    write-host "`n"
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 }
 write-host "The first tool that absolutely mucks up your TEST domain"
