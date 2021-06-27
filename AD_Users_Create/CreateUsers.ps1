@@ -259,6 +259,9 @@
             if ($passwordinDesc -lt 10) { 
                 $description = 'Just so I dont forget my password is ' + $pwd 
             }else{}
+    if($name.length -gt 20){
+        $name = $name.substring(0,20)
+    }
     new-aduser -server $setdc  -Description $Description -DisplayName $name -name $name -SamAccountName $name -Surname $name -Enabled $true -Path $ouLocation -AccountPassword (ConvertTo-SecureString ($pwd) -AsPlainText -force)
     
     
