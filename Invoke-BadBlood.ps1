@@ -158,6 +158,10 @@ if ($badblood -eq 'badblood') {
    .($basescriptPath + '\AD_Groups_Create\AddRandomToGroups.ps1')
    Write-Progress -Activity "Random Stuff into A domain - Adding Stuff to Stuff and Things" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    AddRandomToGroups -Domain $Domain -Userlist $AllUsers -GroupList $Grouplist -LocalGroupList $LocalGroupList -complist $Complist
+
+   write-host "Creating random SPNs" -ForegroundColor Green
+   .($basescriptpath + '\AD_SPN_Randomizer\GenerateRandomSPNs.ps1')
+   CreateRandomSPNs -Count 50
     
 
 
