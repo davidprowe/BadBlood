@@ -279,6 +279,15 @@
         
     
     $pwd = ''
+
+    #==============================
+    # Set Does Not Require Pre-Auth for ASREP
+    #==============================
+    
+    $setASREP = 1..1000|get-random
+    if($setASREP -lt 20){
+	Get-ADuser $name | Set-ADAccountControl -DoesNotRequirePreAuth:$true
+    }
     
     #===============================
     #SET ATTRIBUTES - no additional attributes set at this time besides UPN
