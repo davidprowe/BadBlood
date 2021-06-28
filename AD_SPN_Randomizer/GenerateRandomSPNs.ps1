@@ -48,7 +48,10 @@
         $service = $services | get-Random
         $cn = $computer.Name
         $spn = "$service/$cn"
-        $user | Set-ADUser -ServicePrincipalNames @{Add=$spn}
+        
+        Try { 
+        	$user | Set-ADUser -ServicePrincipalNames @{Add=$spn} -ErrorAction Stop
+        }Catch { $i--}
 
         $i++
     } While($i -lt $SPNCount)

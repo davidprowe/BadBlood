@@ -161,7 +161,7 @@ if ($badblood -eq 'badblood') {
 
    write-host "Creating random SPNs" -ForegroundColor Green
    .($basescriptpath + '\AD_SPN_Randomizer\GenerateRandomSPNs.ps1')
-   CreateRandomSPNs -Count 50
+   CreateRandomSPNs -SPNCount 50
     
 
 
