@@ -107,41 +107,70 @@ if ($badblood -eq 'badblood') {
    $I++
    .($basescriptPath + '\AD_Users_Create\CreateUsers.ps1')
    $createuserscriptpath = $basescriptPath + '\AD_Users_Create\'
+
+   $RunspacePool = [runspacefactory]::CreateRunspacePool(1, 10)
+   $RunspacePool.Open()
+   $Jobs = @()
+
+
+
    do {
-      createuser -Domain $Domain -OUList $ousAll -ScriptDir $createuserscriptpath
-      Write-Progress -Activity "Random Stuff into A domain - Creating $UserCount Users" -Status "Progress:" -PercentComplete ($x / $UserCount * 100)
-      $x++
+      $PowerShell = [powershell]::Create()
+      $PowerShell.RunspacePool = $RunspacePool
+      $PowerShell.AddScript({createuser -Domain $Domain -OUList $ousAll -ScriptDir $createuserscriptpath}) | Out-Null
+      $Jobs += $PowerShell.BeginInvoke()
+       $x++
    }while ($x -lt $UserCount)
 
+   while ($Jobs.IsCompleted -contains $false) {
+        Start-Sleep -Milliseconds 100
+   }
+
+   $Jobs = @()
    #Group Creation
+   $I++
    $AllUsers = Get-aduser -Filter *
+   Write-Progress -Activity "Random Stuff into A domain - Creating Groups" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    write-host "Creating Groups on Domain" -ForegroundColor Green
 
    $x = 1
-   Write-Progress -Activity "Random Stuff into A domain - Creating $GroupCount Groups" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
-   $i++
    .($basescriptPath + '\AD_Groups_Create\CreateGroups.ps1')
     
    do {
-      Creategroup
-      Write-Progress -Activity "Random Stuff into A domain - Creating $GroupCount Groups" -Status "Progress:" -PercentComplete ($x / $GroupCount * 100)
+      $PowerShell = [powershell]::Create()
+      $PowerShell.RunspacePool = $RunspacePool
+      $PowerShell.AddScript({CreateGroup}) | Out-Null
+      $Jobs += $PowerShell.BeginInvoke() | Out-Null
+
       $x++
    }while ($x -lt $GroupCount)
+   while ($Jobs.IsCompleted -contains $false) {
+        Start-Sleep -Milliseconds 100
+   }
+
+
    $Grouplist = Get-ADGroup -Filter { GroupCategory -eq "Security" -and GroupScope -eq "Global" } -Properties isCriticalSystemObject
    $LocalGroupList = Get-ADGroup -Filter { GroupScope -eq "domainlocal" } -Properties isCriticalSystemObject
 
    #Computer Creation Time
    write-host "Creating Computers on Domain" -ForegroundColor Green
-
+   $I++
    $X = 1
+   $Jobs = @()
    Write-Progress -Activity "Random Stuff into A domain - Creating Computers" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    .($basescriptPath + '\AD_Computers_Create\CreateComputers.ps1')
-   $I++
+
    do {
-      Write-Progress -Activity "Random Stuff into A domain - Creating $ComputerCount computers" -Status "Progress:" -PercentComplete ($x / $ComputerCount * 100)
-      createcomputer
+      $PowerShell = [powershell]::Create()
+      $PowerShell.RunspacePool = $RunspacePool
+      $PowerShell.AddScript({createcomputer}) | Out-Null
+      $Jobs += $PowerShell.BeginInvoke()
       $x++
    }while ($x -lt $ComputerCount)
+   while ($Jobs.IsCompleted -contains $false) {
+        Start-Sleep -Milliseconds 100
+   }
+
    $Complist = get-adcomputer -filter *
     
 
