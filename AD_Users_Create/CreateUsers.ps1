@@ -259,6 +259,19 @@
             if ($passwordinDesc -lt 10) { 
                 $description = 'Just so I dont forget my password is ' + $pwd 
             }else{}
+    if($name.length -gt 20){
+        $name = $name.substring(0,20)
+    }
+
+    $exists = $null
+    try {
+        $exists = Get-ADUSer $name -ErrorAction Stop
+    } catch{}
+
+    if($exists){
+        return $true
+    }
+
     new-aduser -server $setdc  -Description $Description -DisplayName $name -name $name -SamAccountName $name -Surname $name -Enabled $true -Path $ouLocation -AccountPassword (ConvertTo-SecureString ($pwd) -AsPlainText -force)
     
     
@@ -266,6 +279,15 @@
         
     
     $pwd = ''
+
+    #==============================
+    # Set Does Not Require Pre-Auth for ASREP
+    #==============================
+    
+    $setASREP = 1..1000|get-random
+    if($setASREP -lt 20){
+	Get-ADuser $name | Set-ADAccountControl -DoesNotRequirePreAuth:$true
+    }
     
     #===============================
     #SET ATTRIBUTES - no additional attributes set at this time besides UPN
@@ -276,11 +298,10 @@
     try{Set-ADUser -Identity $name -UserPrincipalName "$upn" }
     catch{}
     
+    return $false
     ################################
     #End Create User Objects
     ################################
     
     }
-    
-    
     
