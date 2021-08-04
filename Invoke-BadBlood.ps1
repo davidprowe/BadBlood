@@ -51,7 +51,7 @@ function Get-ScriptDirectory {
    Split-Path -Parent $PSCommandPath
 }
 $basescriptPath = Get-ScriptDirectory
-$totalscripts = 7
+$totalscripts = 8
 
 $i = 0
 cls
@@ -119,7 +119,9 @@ if ($badblood -eq 'badblood') {
    $x = 1
    Write-Progress -Activity "Random Stuff into A domain - Creating Users" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    $I++
-   .($basescriptPath + '\AD_Users_Create\CreateUsers.ps1')
+   
+   write-host $basescriptPath
+   .(Join-path $basescriptPath + '\AD_Users_Create\CreateUsers.ps1')
    $createuserscriptpath = $basescriptPath + '\AD_Users_Create\'
 
    $RunspacePool = [runspacefactory]::CreateRunspacePool(1, 10)
@@ -204,8 +206,13 @@ if ($badblood -eq 'badblood') {
    Write-Progress -Activity "Random Stuff into A domain - Adding Stuff to Stuff and Things" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    AddRandomToGroups -Domain $Domain -Userlist $AllUsers -GroupList $Grouplist -LocalGroupList $LocalGroupList -complist $Complist
 
-   write-host "Creating random SPNs" -ForegroundColor Green
-   .($basescriptpath + '\AD_SPN_Randomizer\GenerateRandomSPNs.ps1')
+   # ATTACK Vector Automation
+
+   # SPN Generation
+   $I++
+   write-host "Adding random SPNs to a few User and Computer Objects" -ForegroundColor Green
+   Write-Progress -Activity "SPN Stuff Now" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   .($basescriptpath + '\AD_Attack_Vectors\AD_SPN_Randomizer\CreateRandomSPNs.ps1')
    CreateRandomSPNs -SPNCount 50
     
 
