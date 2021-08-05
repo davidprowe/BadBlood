@@ -68,7 +68,9 @@
             function Get-ScriptDirectory {
                 Split-Path -Parent $PSCommandPath
             }
-            $scriptPath = Get-ScriptDirectory
+            try{$scriptPath = $args[2]}
+            catch{$scriptPath = Get-ScriptDirectory}
+            
         }else{
             $scriptpath = $scriptdir
         }
@@ -227,7 +229,7 @@
     
     
     $accountType = 1..100|get-random 
-    if($accountType -le 10){ # X percent chance of being a service account
+    if($accountType -le 3){ # X percent chance of being a service account
     #service
     $nameSuffix = "SA"
     $description = 'Created with secframe.com/badblood.'
@@ -239,6 +241,7 @@
         
     }else{
         $surname = get-content($scriptpath + '\Names\familynames-usa-top1000.txt')|get-random
+        # Write-Host $surname
     $genderpreference = 0,1|get-random
     if ($genderpreference -eq 0){$givenname = get-content($scriptpath + '\Names\femalenames-usa-top1000.txt')|get-random}else{$givenname = get-content($scriptpath + '\Names\malenames-usa-top1000.txt')|get-random}
     $name = $givenname+"_"+$surname
