@@ -52,27 +52,43 @@
     )
     
         if(!$PSBoundParameters.ContainsKey('Domain')){
+            if($args[0]){
+                $setDC = $args[0].pdcemulator
+                $dnsroot = $args[0].dnsroot
+            }
+            else{
                 $setDC = (Get-ADDomain).pdcemulator
                 $dnsroot = (get-addomain).dnsroot
             }
+        }
             else {
                 $setDC = $Domain.pdcemulator
                 $dnsroot = $Domain.dnsroot
             }
         if (!$PSBoundParameters.ContainsKey('OUList')){
-            $OUsAll = get-adobject -Filter {objectclass -eq 'organizationalunit'} -ResultSetSize 300
+            if($args[1]){
+                $OUsAll = $args[1]
+            }
+            else{
+                $OUsAll = get-adobject -Filter {objectclass -eq 'organizationalunit'} -ResultSetSize 300
+            }
         }else {
             $OUsAll = $OUList
         }
         if (!$PSBoundParameters.ContainsKey('ScriptDir')){
-            function Get-ScriptDirectory {
-                Split-Path -Parent $PSCommandPath
+            
+            if($args[2]){
+
+                # write-host "line 70"
+                $scriptPath = $args[2]}
+            else{
+                    # write-host "did i get here"
+                    $scriptPath = "$((Get-Location).path)\AD_Users_Create\"
+                
             }
-            try{$scriptPath = $args[2]}
-            catch{$scriptPath = Get-ScriptDirectory}
             
         }else{
-            $scriptpath = $scriptdir
+            $scriptpath = $ScriptDir
         }
     
     
@@ -240,10 +256,10 @@
         
         
     }else{
-        $surname = get-content($scriptpath + '\Names\familynames-usa-top1000.txt')|get-random
+        $surname = get-content("$($scriptpath)\Names\familynames-usa-top1000.txt")|get-random
         # Write-Host $surname
     $genderpreference = 0,1|get-random
-    if ($genderpreference -eq 0){$givenname = get-content($scriptpath + '\Names\femalenames-usa-top1000.txt')|get-random}else{$givenname = get-content($scriptpath + '\Names\malenames-usa-top1000.txt')|get-random}
+    if ($genderpreference -eq 0){$givenname = get-content("$($scriptpath)\Names\femalenames-usa-top1000.txt")|get-random}else{$givenname = get-content($scriptpath + '\Names\malenames-usa-top1000.txt')|get-random}
     $name = $givenname+"_"+$surname
     }
     

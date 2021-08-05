@@ -125,6 +125,7 @@ if ($badblood -eq 'badblood') {
    $createuserscriptpath = $basescriptPath + '\AD_Users_Create\'
    # write-host $createuserscriptpath
    #Add custom function to runspace pool https://devblogs.microsoft.com/scripting/powertip-add-custom-function-to-runspace-pool/
+   #. .\AD_Users_Create\CreateUsers.ps1
    $x = 1
    $Definition = Get-Content Function:\CreateUser -ErrorAction Stop
    #Create a sessionstate function entry
@@ -141,11 +142,12 @@ if ($badblood -eq 'badblood') {
      
       $PowerShell = [powershell]::Create()
       [void]$PowerShell.AddScript({CreateUser})
-      [void]$PowerShell.AddArgument("-domain $($Domain)")
-      [void]$PowerShell.AddArgument("-OUList $($ousAll)")
-      [void]$PowerShell.AddArgument("-ScriptDir $($createuserscriptpath)")
+      [void]$PowerShell.AddArgument($Domain)
+      [void]$PowerShell.AddArgument($ousAll)
+      [void]$PowerShell.AddArgument($createuserscriptpath)
       $PowerShell.RunspacePool = $RunspacePool
       $runspaces += [PSCustomObject]@{ Pipe = $PowerShell; Status = $PowerShell.BeginInvoke() }
+      #$runspaces.pipe.streams.error
       
       # $Jobs += $PowerShell.BeginInvoke()
        $x++
