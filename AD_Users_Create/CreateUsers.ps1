@@ -84,7 +84,6 @@
             else{
                     # write-host "did i get here"
                     $scriptPath = "$((Get-Location).path)\AD_Users_Create\"
-                
             }
             
         }else{

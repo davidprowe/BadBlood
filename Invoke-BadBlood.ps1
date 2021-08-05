@@ -25,7 +25,7 @@ param
    [Parameter(Mandatory = $false,
       Position = 1,
       HelpMessage = 'Supply a count for user creation default 2500')]
-   [Int32]$UserCount = 500,
+   [Int32]$UserCount = 2500,
    [Parameter(Mandatory = $false,
       Position = 2,
       HelpMessage = 'Supply a count for user creation default 500')]
@@ -127,7 +127,8 @@ if ($badblood -eq 'badblood') {
    #Add custom function to runspace pool https://devblogs.microsoft.com/scripting/powertip-add-custom-function-to-runspace-pool/
    #. .\AD_Users_Create\CreateUsers.ps1
    $x = 1
-   $Definition = Get-Content Function:\CreateUser -ErrorAction Stop
+   # $Definition = Get-Content Function:\CreateUser -ErrorAction Stop
+   $Definition = Get-Content ($basescriptPath + '\AD_Users_Create\CreateUsers.ps1') -ErrorAction Stop
    #Create a sessionstate function entry
    $SessionStateFunction = New-Object System.Management.Automation.Runspaces.SessionStateFunctionEntry -ArgumentList ‘CreateUser’, $Definition
    #Create a SessionStateFunction
@@ -147,7 +148,8 @@ if ($badblood -eq 'badblood') {
       [void]$PowerShell.AddArgument($createuserscriptpath)
       $PowerShell.RunspacePool = $RunspacePool
       $runspaces += [PSCustomObject]@{ Pipe = $PowerShell; Status = $PowerShell.BeginInvoke() }
-      #$runspaces.pipe.streams.error
+      #
+      $runspaces.pipe.streams.error
       
       # $Jobs += $PowerShell.BeginInvoke()
        $x++
@@ -174,8 +176,9 @@ if ($badblood -eq 'badblood') {
    write-host "Creating Groups on Domain" -ForegroundColor Green
 
    $x = 1
-   .($basescriptPath + '\AD_Groups_Create\CreateGroups.ps1')
-   $Definition = Get-Content Function:\CreateGroup -ErrorAction Stop
+   # .($basescriptPath + '\AD_Groups_Create\CreateGroups.ps1')
+   # $Definition = Get-Content Function:\CreateGroup -ErrorAction Stop
+   $Definition = Get-Content ($basescriptPath + '\AD_Groups_Create\CreateGroups.ps1') -ErrorAction Stop
    #Create a sessionstate function entry
    $SessionStateFunction = New-Object System.Management.Automation.Runspaces.SessionStateFunctionEntry -ArgumentList ‘CreateGroup’, $Definition
    #Create a SessionStateFunction
@@ -215,8 +218,10 @@ if ($badblood -eq 'badblood') {
    $X = 1
    $Jobs = @()
    Write-Progress -Activity "Random Stuff into A domain - Creating Computers" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
-   .($basescriptPath + '\AD_Computers_Create\CreateComputers.ps1')
+   # .($basescriptPath + '\AD_Computers_Create\CreateComputers.ps1')
     #Create a sessionstate function entry
+    
+    $Definition = Get-Content ($basescriptPath + '\AD_Computers_Create\CreateComputers.ps1') -ErrorAction Stop
     $SessionStateFunction = New-Object System.Management.Automation.Runspaces.SessionStateFunctionEntry -ArgumentList ‘CreateComputer’, $Definition
     #Create a SessionStateFunction
     $InitialSessionState = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault()
