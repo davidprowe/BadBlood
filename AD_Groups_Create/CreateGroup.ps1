@@ -45,7 +45,11 @@ Function CreateGroup {
             HelpMessage = 'Supply a result from get-adorganizationalunit -filter *')]
             [Object[]]$OUList,
             [Parameter(Mandatory = $false,
-                Position = 3,
+            Position = 3,
+            HelpMessage = 'Supply a result from get-aduser -filter *')]
+            [Object[]]$UserList,
+            [Parameter(Mandatory = $false,
+                Position = 4,
                 HelpMessage = 'Supply the script directory for where this script is stored')]
             [string]$ScriptDir
     )
@@ -64,6 +68,16 @@ Function CreateGroup {
         }else {
             $OUsAll = $OUList
         }
+        if (!$PSBoundParameters.ContainsKey('UserList')){
+            if($args[1]){
+                $UserList = $args[2]
+            }
+            else{
+                $UserList = get-aduser -ResultSetSize 2500 -Server $setDC -Filter * 
+            }
+        }else {
+            $UserList = $UserList
+        }
         if (!$PSBoundParameters.ContainsKey('ScriptDir')){
             
             if($args[2]){
@@ -76,7 +90,7 @@ Function CreateGroup {
         }else{
             $groupscriptPath = $ScriptDir
         }
-        $userlist = get-aduser -ResultSetSize 2500 -Server $setDC -Filter *
+        
         $ownerinfo = get-random $userlist
         $Description = "User Group Created by Badblood github.com/davidprowe/badblood"
         
@@ -102,11 +116,15 @@ Function CreateGroup {
         $i = 1
         $checkAcct = $null
         do {
-            $checkAcct = get-adgroup $GroupNameFull
+            try{$checkAcct = get-adgroup $GroupNameFull}
+            catch{
+                $GroupNameFull = $GroupNameFull + $i
+                
+            }
+            $i++
         }while($null -ne $checkAcct)   
 
-
         try{New-ADGroup -Server $setdc -Description $Description -Name $GroupNameFull -Path $ouLocation -GroupCategory Security -GroupScope Global -ManagedBy $ownerinfo.distinguishedname}
-        catch{#oopsie
-            }
+        catch{}
+        
 }

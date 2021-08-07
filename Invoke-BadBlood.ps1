@@ -25,7 +25,7 @@ param
    [Parameter(Mandatory = $false,
       Position = 1,
       HelpMessage = 'Supply a count for user creation default 2500')]
-   [Int32]$UserCount = 2500,
+   [Int32]$UserCount = 10,
    [Parameter(Mandatory = $false,
       Position = 2,
       HelpMessage = 'Supply a count for user creation default 500')]
@@ -127,8 +127,8 @@ if ($badblood -eq 'badblood') {
    #Add custom function to runspace pool https://devblogs.microsoft.com/scripting/powertip-add-custom-function-to-runspace-pool/
    #. .\AD_Users_Create\CreateUsers.ps1
    $x = 1
-   # $Definition = Get-Content Function:\CreateUser -ErrorAction Stop
-   $Definition = Get-Content ($basescriptPath + '\AD_Users_Create\CreateUsers.ps1') -ErrorAction Stop
+   $Definition = Get-Content Function:\CreateUser -ErrorAction Stop
+   # $Definition = Get-Content ($basescriptPath + '\AD_Users_Create\CreateUsers.ps1') -ErrorAction Stop
    #Create a sessionstate function entry
    $SessionStateFunction = New-Object System.Management.Automation.Runspaces.SessionStateFunctionEntry -ArgumentList ‘CreateUser’, $Definition
    #Create a SessionStateFunction
@@ -148,8 +148,7 @@ if ($badblood -eq 'badblood') {
       [void]$PowerShell.AddArgument($createuserscriptpath)
       $PowerShell.RunspacePool = $RunspacePool
       $runspaces += [PSCustomObject]@{ Pipe = $PowerShell; Status = $PowerShell.BeginInvoke() }
-      #
-      $runspaces.pipe.streams.error
+      #$runspaces.pipe.streams.error
       
       # $Jobs += $PowerShell.BeginInvoke()
        $x++
@@ -168,7 +167,6 @@ if ($badblood -eq 'badblood') {
   $RunspacePool.Close() 
    $RunspacePool.Dispose()
 
-   $Jobs = @()
    #Group Creation
    $I++
    $AllUsers = Get-aduser -Filter *
@@ -176,9 +174,16 @@ if ($badblood -eq 'badblood') {
    write-host "Creating Groups on Domain" -ForegroundColor Green
 
    $x = 1
-   # .($basescriptPath + '\AD_Groups_Create\CreateGroups.ps1')
-   # $Definition = Get-Content Function:\CreateGroup -ErrorAction Stop
-   $Definition = Get-Content ($basescriptPath + '\AD_Groups_Create\CreateGroups.ps1') -ErrorAction Stop
+   .($basescriptPath + '\AD_Groups_Create\CreateGroup.ps1')
+   
+   #Create a SessionStateFunction
+  
+   
+
+   $createGroupScriptPath = $basescriptPath + '\AD_Groups_Create\'
+   $Definition = Get-Content Function:\CreateGroup -ErrorAction Stop
+   # $Definition = Get-Content ($basescriptPath + '\AD_Groups_Create\CreateGroup.ps1') -ErrorAction Stop
+
    #Create a sessionstate function entry
    $SessionStateFunction = New-Object System.Management.Automation.Runspaces.SessionStateFunctionEntry -ArgumentList ‘CreateGroup’, $Definition
    #Create a SessionStateFunction
@@ -192,6 +197,10 @@ if ($badblood -eq 'badblood') {
    do {
       $PowerShell = [powershell]::Create()
       [void]$PowerShell.AddScript({CreateGroup})
+      [void]$PowerShell.AddArgument($Domain)
+      [void]$PowerShell.AddArgument($ousAll)
+      [void]$PowerShell.AddArgument($AllUsers)
+      [void]$PowerShell.AddArgument($createGroupScriptPath)
       $PowerShell.RunspacePool = $RunspacePool
       $runspaces += [PSCustomObject]@{ Pipe = $PowerShell; Status = $PowerShell.BeginInvoke() }
 
