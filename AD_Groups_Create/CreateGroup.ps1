@@ -47,11 +47,11 @@ Function CreateGroup {
             Position = 2,
             HelpMessage = 'Supply a result from get-adorganizationalunit -filter *')]
             [Object[]]$OUList,
-            [Parameter(Mandatory = $false,
+        [Parameter(Mandatory = $false,
             Position = 3,
             HelpMessage = 'Supply a result from get-aduser -filter *')]
             [Object[]]$UserList,
-            [Parameter(Mandatory = $false,
+        [Parameter(Mandatory = $false,
                 Position = 4,
                 HelpMessage = 'Supply the script directory for where this script is stored')]
             [string]$ScriptDir

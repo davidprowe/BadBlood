@@ -25,11 +25,11 @@ param
    [Parameter(Mandatory = $false,
       Position = 1,
       HelpMessage = 'Supply a count for user creation default 2500')]
-   [Int32]$UserCount = 10,
+   [Int32]$UserCount = 2500,
    [Parameter(Mandatory = $false,
       Position = 2,
       HelpMessage = 'Supply a count for user creation default 500')]
-   [int32]$GroupCount = 10,
+   [int32]$GroupCount = 500,
    [Parameter(Mandatory = $false,
       Position = 3,
       HelpMessage = 'Supply the script directory for where this script is stored')]
@@ -54,7 +54,7 @@ $basescriptPath = Get-ScriptDirectory
 $totalscripts = 8
 
 $i = 0
-cls
+Clear-host
 write-host "Welcome to BadBlood"
 if($NonInteractive -eq $false){
     Write-Host  'Press any key to continue...';
@@ -184,7 +184,35 @@ if ($badblood -eq 'badblood') {
    Write-Progress -Activity "SPN Stuff Now" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    .($basescriptpath + '\AD_Attack_Vectors\AD_SPN_Randomizer\CreateRandomSPNs.ps1')
    CreateRandomSPNs -SPNCount 50
-    
+
+   write-host "Adding ASREP for a few users" -ForegroundColor Green
+   Write-Progress -Activity "Adding ASREP Now" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   # get .05 percent of the all users output and asrep them
+   $ASREPCount = [Math]::Ceiling($AllUsers.count * .05)
+   $ASREPUsers = @()
+   $asrep = 1
+   do {
+
+      $ASREPUsers += get-random($AllUsers)
+      $asrep++}while($asrep -le $ASREPCount)
+
+   .($basescriptpath + '\AD_Attack_Vectors\ASREP_NotReqPreAuth.ps1')
+   ADREP_NotReqPreAuth -UserList $ASREPUsers
+      <#
+   write-host "Adding Weak User Passwords for a few users" -ForegroundColor Green
+   Write-Progress -Activity "Adding Weak User Passwords" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   # get .05 percent of the all users output and asrep them
+   $WeakCount = [Math]::Ceiling($AllUsers.count * .02)
+   $WeakUsers = @()
+   $asrep = 1
+   do {
+
+      $WeakUsers += get-random($AllUsers)
+      $asrep++}while($asrep -le $WeakCount)
+
+   .($basescriptpath + '\AD_Attack_Vectors\WeakUserPasswords.ps1')
+   WeakUserPasswords -UserList $WeakUsers
+    #>
 
 
 }
