@@ -52,25 +52,42 @@
     )
     
         if(!$PSBoundParameters.ContainsKey('Domain')){
+            if($args[0]){
+                $setDC = $args[0].pdcemulator
+                $dnsroot = $args[0].dnsroot
+            }
+            else{
                 $setDC = (Get-ADDomain).pdcemulator
                 $dnsroot = (get-addomain).dnsroot
             }
+        }
             else {
                 $setDC = $Domain.pdcemulator
                 $dnsroot = $Domain.dnsroot
             }
         if (!$PSBoundParameters.ContainsKey('OUList')){
-            $OUsAll = get-adobject -Filter {objectclass -eq 'organizationalunit'} -ResultSetSize 300
+            if($args[1]){
+                $OUsAll = $args[1]
+            }
+            else{
+                $OUsAll = get-adobject -Filter {objectclass -eq 'organizationalunit'} -ResultSetSize 300
+            }
         }else {
             $OUsAll = $OUList
         }
         if (!$PSBoundParameters.ContainsKey('ScriptDir')){
-            function Get-ScriptDirectory {
-                Split-Path -Parent $PSCommandPath
+            
+            if($args[2]){
+
+                # write-host "line 70"
+                $scriptPath = $args[2]}
+            else{
+                    # write-host "did i get here"
+                    $scriptPath = "$((Get-Location).path)\AD_Users_Create\"
             }
-            $scriptPath = Get-ScriptDirectory
+            
         }else{
-            $scriptpath = $scriptdir
+            $scriptpath = $ScriptDir
         }
     
     
@@ -227,7 +244,7 @@
     
     
     $accountType = 1..100|get-random 
-    if($accountType -le 10){ # X percent chance of being a service account
+    if($accountType -le 3){ # X percent chance of being a service account
     #service
     $nameSuffix = "SA"
     $description = 'Created with secframe.com/badblood.'
@@ -238,9 +255,10 @@
         
         
     }else{
-        $surname = get-content($scriptpath + '\Names\familynames-usa-top1000.txt')|get-random
+        $surname = get-content("$($scriptpath)\Names\familynames-usa-top1000.txt")|get-random
+        # Write-Host $surname
     $genderpreference = 0,1|get-random
-    if ($genderpreference -eq 0){$givenname = get-content($scriptpath + '\Names\femalenames-usa-top1000.txt')|get-random}else{$givenname = get-content($scriptpath + '\Names\malenames-usa-top1000.txt')|get-random}
+    if ($genderpreference -eq 0){$givenname = get-content("$($scriptpath)\Names\femalenames-usa-top1000.txt")|get-random}else{$givenname = get-content($scriptpath + '\Names\malenames-usa-top1000.txt')|get-random}
     $name = $givenname+"_"+$surname
     }
     
@@ -259,6 +277,19 @@
             if ($passwordinDesc -lt 10) { 
                 $description = 'Just so I dont forget my password is ' + $pwd 
             }else{}
+    if($name.length -gt 20){
+        $name = $name.substring(0,20)
+    }
+
+    $exists = $null
+    try {
+        $exists = Get-ADUSer $name -ErrorAction Stop
+    } catch{}
+
+    if($exists){
+        return $true
+    }
+
     new-aduser -server $setdc  -Description $Description -DisplayName $name -name $name -SamAccountName $name -Surname $name -Enabled $true -Path $ouLocation -AccountPassword (ConvertTo-SecureString ($pwd) -AsPlainText -force)
     
     
@@ -266,6 +297,15 @@
         
     
     $pwd = ''
+
+    #==============================
+    # Set Does Not Require Pre-Auth for ASREP
+    #==============================
+    
+    $setASREP = 1..1000|get-random
+    if($setASREP -lt 20){
+	Get-ADuser $name | Set-ADAccountControl -DoesNotRequirePreAuth:$true
+    }
     
     #===============================
     #SET ATTRIBUTES - no additional attributes set at this time besides UPN
@@ -276,11 +316,10 @@
     try{Set-ADUser -Identity $name -UserPrincipalName "$upn" }
     catch{}
     
+    # return $false
     ################################
     #End Create User Objects
     ################################
     
     }
-    
-    
     
