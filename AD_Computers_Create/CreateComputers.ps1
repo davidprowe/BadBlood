@@ -2,47 +2,140 @@
 #Create Computer Objects
 ################################
 Function CreateComputer{
+<#
+        .SYNOPSIS
+            Creates a Computer Object in an active directory environment based on random data
+        
+        .DESCRIPTION
+            Starting with the root container this tool randomly places users in the domain.
+        
+        .PARAMETER Domain
+            The stored value of get-addomain is used for this.  It is used to call the PDC and other items in the domain
+        
+        .PARAMETER OUList
+            The stored value of get-adorganizationalunit -filter *.  This is used to place Computers in random locations.
 
-    param(
+        .PARAMETER UserList
+            The stored value of get-aduser -filter *.  This is used to put random ownership on computers.
+        
+        .PARAMETER ScriptDir
+            The location of the script.  Pulling this into a parameter to attempt to speed up processing.
+        
+        .EXAMPLE
             
-            $Owner,
-            $Creator,
-            $WorkstationOrServer,
-            $OUlocation,
-            $Make,
-            $Model,
-            $SN,
-            $IP,
-            $DNS,
-            $Gateway,
-            $WorkstationType,
-            $ServerApplication,
-            $Description,
-            $debug,
-            $HideResults
-        )
+     
+        
+        .NOTES
+            
+            
+            Unless required by applicable law or agreed to in writing, software
+            distributed under the License is distributed on an "AS IS" BASIS,
+            WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+            See the License for the specific language governing permissions and
+            limitations under the License.
+            
+            Author's blog: https://www.secframe.com
+    
+        
+    #>
+    [CmdletBinding()]
+    
+    param
+    (
+        [Parameter(Mandatory = $false,
+            Position = 1,
+            HelpMessage = 'Supply a result from get-addomain')]
+            [Object[]]$Domain,
+        [Parameter(Mandatory = $false,
+            Position = 2,
+            HelpMessage = 'Supply a result from get-adorganizationalunit -filter *')]
+            [Object[]]$OUList,
+            [Parameter(Mandatory = $false,
+            Position = 3,
+            HelpMessage = 'Supply a result from get-aduser -filter *')]
+            [Object[]]$UserList,
+            [Parameter(Mandatory = $false,
+                Position = 4,
+                HelpMessage = 'Supply the script directory for where this script is stored')]
+            [string]$ScriptDir
+    )
+    
+        if(!$PSBoundParameters.ContainsKey('Domain')){
+            if($args[0]){
+                $setDC = $args[0].pdcemulator
+                $dn = $args[0].distinguishedname
+            }
+            else{
+                $d = Get-ADDomain
+                $setDC = ($d).pdcemulator
+                $dn = ($d).distinguishedname
+            }
+        }else {$setDC = $Domain.pdcemulator}
+        if (!$PSBoundParameters.ContainsKey('OUList')){
+            if($args[1]){
+                $OUsAll = $args[1]
+            }
+            else{
+                $OUsAll = get-adobject -Filter {objectclass -eq 'organizationalunit'} -ResultSetSize 300
+            }
+        }else {
+            $OUsAll = $OUList
+        }
+        if (!$PSBoundParameters.ContainsKey('UserList')){
+            if($args[1]){
+                $UserList = $args[2]
+            }
+            else{
+                $UserList = get-aduser -ResultSetSize 2500 -Server $setDC -Filter * 
+            }
+        }else {
+            $UserList = $UserList
+        }
+        if (!$PSBoundParameters.ContainsKey('ScriptDir')){
+            
+            if($args[2]){
+
+                $scriptpath = $args[2]}
+            else{
+                    $scriptpath = "$((Get-Location).path)\AD_Computers_Create\"
+            }
+            
+        }else{
+            $scriptpath = $ScriptDir
+        }
+
+    # param(
+            
+    #         $Owner,
+    #         $Creator,
+    #         $WorkstationOrServer,
+    #         $OUlocation,
+    #         $Make,
+    #         $Model,
+    #         $SN,
+    #         $IP,
+    #         $DNS,
+    #         $Gateway,
+    #         $WorkstationType,
+    #         $ServerApplication,
+    #         $Description,
+    #         $debug,
+    #         $HideResults
+    #     )
 
     
     #=======================================================================
     
-    
-    $setDC = (Get-ADDomain).pdcemulator
-    $userlist = get-adobject -Filter {objectclass -eq 'user'} -ResultSetSize 2500 -Server $setdc|Where-object -Property objectclass -eq user
-    function Get-ScriptDirectory {
-        Split-Path -Parent $PSCommandPath
-    }
-    $scriptPath = Get-ScriptDirectory
     $scriptparent = (get-item $scriptpath).parent.fullname
     $3lettercodes = import-csv ($scriptparent + "\AD_OU_CreateStructure\3lettercodes.csv")
     #=======================================================================
-    $dn = (get-addomain).distinguishedname
         
-            #get owner all parameters and store as variable to call upon later
-            $ownerinfo = Get-Random $userlist
-                    if ($PSBoundParameters.ContainsKey('Creator') -eq $true)
-                        {$adminID = $Creator
-                        }
-                    else{$adminID = $wtfwasthis = ((whoami) -split '\\')[1]}
+    #get owner all parameters and store as variable to call upon later
+    $ownerinfo = Get-Random $userlist
+            if ($PSBoundParameters.ContainsKey('Creator') -eq $true)
+                {$adminID = $Creator
+                }
+            else{$adminID  = ((whoami) -split '\\')[1]}
     
 
     #=======================================================================
@@ -183,7 +276,7 @@ Function CreateComputer{
             # END SERVER OU identification
             #=========================================
             <#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#> 
-              $OUsAll = get-adobject -Filter {objectclass -eq 'organizationalunit'} -ResultSetSize 300
+            #   $OUsAll = get-adobject -Filter {objectclass -eq 'organizationalunit'} -ResultSetSize 300
               # removing containers right now. will add later $ousall += get-adobject -Filter {objectclass -eq 'container'} -ResultSetSize 300|where-object -Property objectclass -eq 'container'|where-object -Property distinguishedname -notlike "*}*"|where-object -Property distinguishedname -notlike  "*DomainUpdates*"
 
                     $ouLocation = (Get-Random $OUsAll).distinguishedname
@@ -258,9 +351,6 @@ Function CreateComputer{
 
     $ou = $oulocation
         [System.Collections.ArrayList]$att_to_add = @('servicePrincipalName')
-    
-
-    $division = $computernameprefix1
 
     $manager = $ownerinfo.distinguishedname 
     $sam = ($CompName) + "$"
@@ -318,28 +408,6 @@ Function CreateComputer{
 
 
     $done = @()
-
-
-}
-Function NewComputers{
-    param(
-    
-        $NumberOfMachines
-    )
-
-if ($PSBoundParameters.ContainsKey('NumberOfMachines') -eq $false){
-            $NumberofMachines = 5
-            #write-host No number specified.  Defaulting to create 5 machines
-                        }
-                        
-
-$i = 1
-do {
-    CreateComputer
-$i++
-
-}
-while ($i -le $NumberOfMachines)
 
 
 }

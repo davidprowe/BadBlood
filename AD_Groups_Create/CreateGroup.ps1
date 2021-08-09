@@ -11,6 +11,9 @@ Function CreateGroup {
         
         .PARAMETER OUList
             The stored value of get-adorganizationalunit -filter *.  This is used to place users in random locations.
+
+        .PARAMETER UserList
+            The stored value of get-aduser -filter *.  This is used to place make random users owners/managers of groups.
         
         .PARAMETER ScriptDir
             The location of the script.  Pulling this into a parameter to attempt to speed up processing.

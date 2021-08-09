@@ -9,7 +9,7 @@
        [String]
     .NOTES
        Written by David Rowe, Blog secframe.com
-       Twitter : @davidprowe
+       Twitter : @davicdprowe
        I take no responsibility for any issues caused by this script.  I am not responsible if this gets run in a production domain. 
       Thanks HuskyHacks for user/group/computer count modifications.  I moved them to parameters so that this tool can be called in a more rapid fashion.
     .FUNCTIONALITY
@@ -29,7 +29,7 @@ param
    [Parameter(Mandatory = $false,
       Position = 2,
       HelpMessage = 'Supply a count for user creation default 500')]
-   [int32]$GroupCount = 500,
+   [int32]$GroupCount = 10,
    [Parameter(Mandatory = $false,
       Position = 3,
       HelpMessage = 'Supply the script directory for where this script is stored')]
@@ -123,12 +123,76 @@ if ($badblood -eq 'badblood') {
    
    .($basescriptPath + '\AD_Users_Create\CreateUsers.ps1')
    $createuserscriptpath = $basescriptPath + '\AD_Users_Create\'
-   # write-host $createuserscriptpath
-   #Add custom function to runspace pool https://devblogs.microsoft.com/scripting/powertip-add-custom-function-to-runspace-pool/
-   #. .\AD_Users_Create\CreateUsers.ps1
+   do {
+      createuser -Domain $Domain -OUList $ousAll -ScriptDir $createuserscriptpath
+      Write-Progress -Activity "Random Stuff into A domain - Creating $UserCount Users" -Status "Progress:" -PercentComplete ($x / $UserCount * 100)
+      $x++
+   }while ($x -lt $UserCount)
+
+  #Group Creation
+   $AllUsers = Get-aduser -Filter *
+   write-host "Creating Groups on Domain" -ForegroundColor Green
+
    $x = 1
-   $Definition = Get-Content Function:\CreateUser -ErrorAction Stop
-   # $Definition = Get-Content ($basescriptPath + '\AD_Users_Create\CreateUsers.ps1') -ErrorAction Stop
+   Write-Progress -Activity "Random Stuff into A domain - Creating $GroupCount Groups" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   $i++
+   .($basescriptPath + '\AD_Groups_Create\CreateGroup.ps1')
+   $createGroupScriptPath = $basescriptPath + '\AD_Groups_Create\'
+    
+   do {
+      Creategroup -Domain $Domain -OUList $ousAll -UserList $AllUsers -ScriptDir $createGroupScriptPath
+      Write-Progress -Activity "Random Stuff into A domain - Creating $GroupCount Groups" -Status "Progress:" -PercentComplete ($x / $GroupCount * 100)
+      $x++
+   }while ($x -lt $GroupCount)
+   $Grouplist = Get-ADGroup -Filter { GroupCategory -eq "Security" -and GroupScope -eq "Global" } -Properties isCriticalSystemObject
+   $LocalGroupList = Get-ADGroup -Filter { GroupScope -eq "domainlocal" } -Properties isCriticalSystemObject
+   
+   #Computer Creation Time
+   write-host "Creating Computers on Domain" -ForegroundColor Green
+
+   $X = 1
+   Write-Progress -Activity "Random Stuff into A domain - Creating Computers" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   .($basescriptPath + '\AD_Computers_Create\CreateComputers.ps1')
+   $I++
+   do {
+      Write-Progress -Activity "Random Stuff into A domain - Creating $ComputerCount computers" -Status "Progress:" -PercentComplete ($x / $ComputerCount * 100)
+      createcomputer
+      $x++
+   }while ($x -lt $ComputerCount)
+   $Complist = get-adcomputer -filter *
+    
+
+   #Permission Creation of ACLs
+   $I++
+   write-host "Creating Permissions on Domain" -ForegroundColor Green
+   Write-Progress -Activity "Random Stuff into A domain - Creating Random Permissions" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   .($basescriptPath + '\AD_Permissions_Randomizer\GenerateRandomPermissions.ps1')
+    
+    
+   # Nesting of objects
+   $I++
+   write-host "Nesting objects into groups on Domain" -ForegroundColor Green
+   .($basescriptPath + '\AD_Groups_Create\AddRandomToGroups.ps1')
+   Write-Progress -Activity "Random Stuff into A domain - Adding Stuff to Stuff and Things" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   AddRandomToGroups -Domain $Domain -Userlist $AllUsers -GroupList $Grouplist -LocalGroupList $LocalGroupList -complist $Complist
+
+   # ATTACK Vector Automation
+
+   # SPN Generation
+   $I++
+   write-host "Adding random SPNs to a few User and Computer Objects" -ForegroundColor Green
+   Write-Progress -Activity "SPN Stuff Now" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   .($basescriptpath + '\AD_Attack_Vectors\AD_SPN_Randomizer\CreateRandomSPNs.ps1')
+   CreateRandomSPNs -SPNCount 50
+    
+
+
+}
+# $Definition = Get-Content Function:\CreateUser -ErrorAction Stop
+   <#
+   Attempt at multi threading.  Issues with AD Limits and connections per user per second.
+   #Add custom function to runspace pool https://devblogs.microsoft.com/scripting/powertip-add-custom-function-to-runspace-pool/
+   $Definition = Get-Content ($basescriptPath + '\AD_Users_Create\CreateUsers.ps1') -ErrorAction Stop
    #Create a sessionstate function entry
    $SessionStateFunction = New-Object System.Management.Automation.Runspaces.SessionStateFunctionEntry -ArgumentList ‘CreateUser’, $Definition
    #Create a SessionStateFunction
@@ -136,7 +200,7 @@ if ($badblood -eq 'badblood') {
    $initialSessionState.ImportPSModule("ActiveDirectory")
    $InitialSessionState.Commands.Add($SessionStateFunction)
 
-   $RunspacePool = [RunspaceFactory]::CreateRunspacePool(1,10,$InitialSessionState,$Host)
+   $RunspacePool = [RunspaceFactory]::CreateRunspacePool(1,5,$InitialSessionState,$Host)
    $RunspacePool.Open()
    $runspaces = $results = @()
    do {
@@ -191,7 +255,7 @@ if ($badblood -eq 'badblood') {
    $initialSessionState.ImportPSModule("ActiveDirectory")
    $InitialSessionState.Commands.Add($SessionStateFunction)
 
-   $RunspacePool = [RunspaceFactory]::CreateRunspacePool(1,10,$InitialSessionState,$Host)
+   $RunspacePool = [RunspaceFactory]::CreateRunspacePool(1,5,$InitialSessionState,$Host)
    $RunspacePool.Open()
    $runspaces = $results = @()
    do {
@@ -237,7 +301,7 @@ if ($badblood -eq 'badblood') {
     $initialSessionState.ImportPSModule("ActiveDirectory")
     $InitialSessionState.Commands.Add($SessionStateFunction)
  
-    $RunspacePool = [RunspaceFactory]::CreateRunspacePool(1,10,$InitialSessionState,$Host)
+    $RunspacePool = [RunspaceFactory]::CreateRunspacePool(1,5,$InitialSessionState,$Host)
     $RunspacePool.Open()
     $runspaces = $results = @()
 
@@ -259,33 +323,4 @@ if ($badblood -eq 'badblood') {
   }
   $RunspacePool.Close() 
    $RunspacePool.Dispose()
-
-   $Complist = get-adcomputer -filter *
-    
-
-   #Permission Creation of ACLs
-   $I++
-   write-host "Creating Permissions on Domain" -ForegroundColor Green
-   Write-Progress -Activity "Random Stuff into A domain - Creating Random Permissions" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
-   .($basescriptPath + '\AD_Permissions_Randomizer\GenerateRandomPermissions.ps1')
-    
-    
-   # Nesting of objects
-   $I++
-   write-host "Nesting objects into groups on Domain" -ForegroundColor Green
-   .($basescriptPath + '\AD_Groups_Create\AddRandomToGroups.ps1')
-   Write-Progress -Activity "Random Stuff into A domain - Adding Stuff to Stuff and Things" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
-   AddRandomToGroups -Domain $Domain -Userlist $AllUsers -GroupList $Grouplist -LocalGroupList $LocalGroupList -complist $Complist
-
-   # ATTACK Vector Automation
-
-   # SPN Generation
-   $I++
-   write-host "Adding random SPNs to a few User and Computer Objects" -ForegroundColor Green
-   Write-Progress -Activity "SPN Stuff Now" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
-   .($basescriptpath + '\AD_Attack_Vectors\AD_SPN_Randomizer\CreateRandomSPNs.ps1')
-   CreateRandomSPNs -SPNCount 50
-    
-
-
-}
+#>

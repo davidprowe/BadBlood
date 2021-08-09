@@ -316,7 +316,7 @@
     try{Set-ADUser -Identity $name -UserPrincipalName "$upn" }
     catch{}
     
-    return $false
+    # return $false
     ################################
     #End Create User Objects
     ################################
