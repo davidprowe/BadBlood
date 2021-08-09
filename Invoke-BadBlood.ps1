@@ -9,7 +9,7 @@
        [String]
     .NOTES
        Written by David Rowe, Blog secframe.com
-       Twitter : @davicdprowe
+       Twitter : @davidprowe
        I take no responsibility for any issues caused by this script.  I am not responsible if this gets run in a production domain. 
       Thanks HuskyHacks for user/group/computer count modifications.  I moved them to parameters so that this tool can be called in a more rapid fashion.
     .FUNCTIONALITY
