@@ -83,6 +83,9 @@ if($NonInteractive -eq $false){
 }
 write-host "`n"
 write-host "Domain size generated via parameters `n Users: $UserCount `n Groups: $GroupCount `n Computers: $ComputerCount"
+if ($PSBoundParameters.ContainsKey('WeakPasswords')) {
+   write-host "Some of these users will have weak passwords`n.    Note! Default password Group Policy does not accept these, edit as needed" 
+}
 write-host "`n"
 $badblood = "badblood"
 if($NonInteractive -eq $false){
