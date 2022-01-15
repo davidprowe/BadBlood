@@ -55,7 +55,7 @@ function Get-ScriptDirectory {
    Split-Path -Parent $PSCommandPath
 }
 $basescriptPath = Get-ScriptDirectory
-$totalscripts = 9
+$totalscripts = 8
 
 $i = 0
 Clear-host
@@ -213,7 +213,7 @@ if ($badblood -eq 'badblood') {
       # get .02 percent of all users and set weak passwords
       $WeakCount = [Math]::Ceiling($AllUsers.count * .02)
       Write-Host "Adding Weak User Passwords for $WeakCount users" -ForegroundColor Green
-      Write-Progress -Activity "Adding Weak User Passwords" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+      #Write-Progress -Activity "Adding Weak User Passwords" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
       $WeakUsers = @()
       $weak = 1
       do {
