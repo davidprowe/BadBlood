@@ -28,7 +28,7 @@ param
    [Int32]$UserCount = 2500,
    [Parameter(Mandatory = $false,
       Position = 2,
-      HelpMessage = 'Supply a count for user creation default 500')]
+      HelpMessage = 'Supply a count for group creation default 500')]
    [int32]$GroupCount = 500,
    [Parameter(Mandatory = $false,
       Position = 3,
@@ -45,7 +45,11 @@ param
    [Parameter(Mandatory = $false,
       Position = 6,
       HelpMessage = 'Make non-interactive for automation')]
-   [switch]$NonInteractive
+   [switch]$NonInteractive,
+   [Parameter(Mandatory = $false,
+      Position = 7,
+      HelpMessage = 'Add a few uses with weak passwords')]
+   [switch]$WeakPasswords
 )
 function Get-ScriptDirectory {
    Split-Path -Parent $PSCommandPath
@@ -198,24 +202,23 @@ if ($badblood -eq 'badblood') {
 
    .($basescriptpath + '\AD_Attack_Vectors\ASREP_NotReqPreAuth.ps1')
    ADREP_NotReqPreAuth -UserList $ASREPUsers
-      <#
-   write-host "Adding Weak User Passwords for a few users" -ForegroundColor Green
-   Write-Progress -Activity "Adding Weak User Passwords" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
-   # get .05 percent of the all users output and asrep them
-   $WeakCount = [Math]::Ceiling($AllUsers.count * .02)
-   $WeakUsers = @()
-   $asrep = 1
-   do {
-
-      $WeakUsers += get-random($AllUsers)
-      $asrep++}while($asrep -le $WeakCount)
-
-   .($basescriptpath + '\AD_Attack_Vectors\WeakUserPasswords.ps1')
-   WeakUserPasswords -UserList $WeakUsers
-    #>
-
-
-}
+   
+   if ($PSBoundParameters.ContainsKey('SkipOuCreation') -eq $false) {
+      write-host "Adding Weak User Passwords for a few users" -ForegroundColor Green
+      Write-Progress -Activity "Adding Weak User Passwords" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+      # get .05 percent of the all users output and asrep them
+      $WeakCount = [Math]::Ceiling($AllUsers.count * .02)
+      $WeakUsers = @()
+      $asrep = 1
+      do {
+      
+         $WeakUsers += get-random($AllUsers)
+         $asrep++}while($asrep -le $WeakCount)
+         
+      .($basescriptpath + '\AD_Attack_Vectors\WeakUserPasswords.ps1')
+      WeakUserPasswords -UserList $WeakUsers
+      }
+   }
 # $Definition = Get-Content Function:\CreateUser -ErrorAction Stop
    <#
    Attempt at multi threading.  Issues with AD Limits and connections per user per second.
