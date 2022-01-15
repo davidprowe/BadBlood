@@ -48,7 +48,7 @@ param
    [switch]$NonInteractive,
    [Parameter(Mandatory = $false,
       Position = 7,
-      HelpMessage = 'Add a few uses with weak passwords')]
+      HelpMessage = 'Add a few users with weak passwords')]
    [switch]$WeakPasswords
 )
 function Get-ScriptDirectory {
