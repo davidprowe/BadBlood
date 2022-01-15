@@ -192,10 +192,11 @@ if ($badblood -eq 'badblood') {
    .($basescriptpath + '\AD_Attack_Vectors\AD_SPN_Randomizer\CreateRandomSPNs.ps1')
    CreateRandomSPNs -SPNCount 50
 
-   write-host "Adding ASREP for a few users" -ForegroundColor Green
-   Write-Progress -Activity "Adding ASREP Now" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    # get .05 percent of the all users output and asrep them
    $ASREPCount = [Math]::Ceiling($AllUsers.count * .05)
+   write-host "Adding ASREP for $ASREPCount users" -ForegroundColor Green
+   Write-Progress -Activity "Adding ASREP Now" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
+   
    $ASREPUsers = @()
    $asrep = 1
    do {
@@ -207,16 +208,16 @@ if ($badblood -eq 'badblood') {
    ADREP_NotReqPreAuth -UserList $ASREPUsers
    
    if ($PSBoundParameters.ContainsKey('WeakPasswords')) {
-      write-host "Adding Weak User Passwords for a few users" -ForegroundColor Green
-      Write-Progress -Activity "Adding Weak User Passwords" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
-      # get .05 percent of the all users output and asrep them
+      # get .02 percent of all users and set weak passwords
       $WeakCount = [Math]::Ceiling($AllUsers.count * .02)
+      write-host "Adding Weak User Passwords for $WeakCount users" -ForegroundColor Green
+      Write-Progress -Activity "Adding Weak User Passwords" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
       $WeakUsers = @()
-      $asrep = 1
+      $weakcount = 1
       do {
       
          $WeakUsers += get-random($AllUsers)
-         $asrep++}while($asrep -le $WeakCount)
+         $weakcount++}while($weakcount -le $WeakCount)
          
       .($basescriptpath + '\AD_Attack_Vectors\WeakUserPasswords.ps1')
       WeakUserPasswords -UserList $WeakUsers
