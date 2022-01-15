@@ -55,38 +55,38 @@ function Get-ScriptDirectory {
    Split-Path -Parent $PSCommandPath
 }
 $basescriptPath = Get-ScriptDirectory
-$totalscripts = 8
+$totalscripts = 9
 
 $i = 0
 Clear-host
-write-host "Welcome to BadBlood"
+Write-Host "Welcome to BadBlood"
 if($NonInteractive -eq $false){
     Write-Host  'Press any key to continue...';
-    write-host "`n"
+    Write-Host "`n"
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 }
-write-host "The first tool that absolutely mucks up your TEST domain"
-write-host "This tool is never meant for production and can totally screw up your domain"
+Write-Host "The first tool that absolutely mucks up your TEST domain"
+Write-Host "This tool is never meant for production and can totally screw up your domain"
 
 if($NonInteractive -eq $false){
     Write-Host  'Press any key to continue...';
-    write-host "`n"
+    Write-Host "`n"
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 }
 Write-Host  'Press any key to continue...';
-write-host "You are responsible for how you use this tool. It is intended for personal use only"
-write-host "This is not intended for commercial use"
+Write-Host "You are responsible for how you use this tool. It is intended for personal use only"
+Write-Host "This is not intended for commercial use"
 if($NonInteractive -eq $false){
     Write-Host  'Press any key to continue...';
-    write-host "`n"
+    Write-Host "`n"
     $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
 }
-write-host "`n"
-write-host "Domain size generated via parameters `n Users: $UserCount `n Groups: $GroupCount `n Computers: $ComputerCount"
+Write-Host "`n"
+Write-Host "Domain size generated via parameters `n Users: $UserCount `n Groups: $GroupCount `n Computers: $ComputerCount"
 if ($PSBoundParameters.ContainsKey('WeakPasswords')) {
-   write-host " -> Some of these users will have weak passwords.`n    Note! Default password Group Policy does not accept these, edit as needed" 
+   Write-Host " -> Some of these users will have weak passwords.`n    Note! Default password Group Policy does not accept these, edit as needed" 
 }
-write-host "`n"
+Write-Host "`n"
 $badblood = "badblood"
 if($NonInteractive -eq $false){
 
@@ -122,7 +122,7 @@ if ($badblood -eq 'badblood') {
    
    # User Creation
    $ousAll = Get-adorganizationalunit -filter *
-   write-host "Creating Users on Domain" -ForegroundColor Green
+   Write-Host "Creating Users on Domain" -ForegroundColor Green
     
    
    Write-Progress -Activity "Random Stuff into A domain - Creating Users" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
@@ -136,9 +136,9 @@ if ($badblood -eq 'badblood') {
       $x++
    }while ($x -lt $UserCount)
 
-  #Group Creation
-   $AllUsers = Get-aduser -Filter *
-   write-host "Creating Groups on Domain" -ForegroundColor Green
+   #Group Creation
+   $AllUsers = Get-ADUser -Filter *
+   Write-Host "Creating Groups on Domain" -ForegroundColor Green
 
    $x = 1
    Write-Progress -Activity "Random Stuff into A domain - Creating $GroupCount Groups" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
@@ -155,7 +155,7 @@ if ($badblood -eq 'badblood') {
    $LocalGroupList = Get-ADGroup -Filter { GroupScope -eq "domainlocal" } -Properties isCriticalSystemObject
    
    #Computer Creation Time
-   write-host "Creating Computers on Domain" -ForegroundColor Green
+   Write-Host "Creating Computers on Domain" -ForegroundColor Green
 
    $X = 1
    Write-Progress -Activity "Random Stuff into A domain - Creating Computers" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
@@ -171,14 +171,14 @@ if ($badblood -eq 'badblood') {
 
    #Permission Creation of ACLs
    $I++
-   write-host "Creating Permissions on Domain" -ForegroundColor Green
+   Write-Host "Creating Permissions on Domain" -ForegroundColor Green
    Write-Progress -Activity "Random Stuff into A domain - Creating Random Permissions" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    .($basescriptPath + '\AD_Permissions_Randomizer\GenerateRandomPermissions.ps1')
     
     
    # Nesting of objects
    $I++
-   write-host "Nesting objects into groups on Domain" -ForegroundColor Green
+   Write-Host "Nesting objects into groups on Domain" -ForegroundColor Green
    .($basescriptPath + '\AD_Groups_Create\AddRandomToGroups.ps1')
    Write-Progress -Activity "Random Stuff into A domain - Adding Stuff to Stuff and Things" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    AddRandomToGroups -Domain $Domain -Userlist $AllUsers -GroupList $Grouplist -LocalGroupList $LocalGroupList -complist $Complist
@@ -187,14 +187,14 @@ if ($badblood -eq 'badblood') {
 
    # SPN Generation
    $I++
-   write-host "Adding random SPNs to a few User and Computer Objects" -ForegroundColor Green
+   Write-Host "Adding random SPNs to a few User and Computer Objects" -ForegroundColor Green
    Write-Progress -Activity "SPN Stuff Now" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    .($basescriptpath + '\AD_Attack_Vectors\AD_SPN_Randomizer\CreateRandomSPNs.ps1')
    CreateRandomSPNs -SPNCount 50
 
    # get .05 percent of the all users output and asrep them
    $ASREPCount = [Math]::Ceiling($AllUsers.count * .05)
-   write-host "Adding ASREP for $ASREPCount users" -ForegroundColor Green
+   Write-Host "Adding ASREP for $ASREPCount users" -ForegroundColor Green
    Write-Progress -Activity "Adding ASREP Now" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
    
    $ASREPUsers = @()
@@ -207,21 +207,24 @@ if ($badblood -eq 'badblood') {
    .($basescriptpath + '\AD_Attack_Vectors\ASREP_NotReqPreAuth.ps1')
    ADREP_NotReqPreAuth -UserList $ASREPUsers
    
+   $I++
+   # Weak Passwords
    if ($PSBoundParameters.ContainsKey('WeakPasswords')) {
       # get .02 percent of all users and set weak passwords
       $WeakCount = [Math]::Ceiling($AllUsers.count * .02)
-      write-host "Adding Weak User Passwords for $WeakCount users" -ForegroundColor Green
+      Write-Host "Adding Weak User Passwords for $WeakCount users" -ForegroundColor Green
       Write-Progress -Activity "Adding Weak User Passwords" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
       $WeakUsers = @()
-      $weakcount = 1
+      $weak = 1
       do {
       
          $WeakUsers += get-random($AllUsers)
-         $weakcount++}while($weakcount -le $WeakCount)
+         $weak++}while($weak -le $WeakCount)
          
       .($basescriptpath + '\AD_Attack_Vectors\WeakUserPasswords.ps1')
       WeakUserPasswords -UserList $WeakUsers
       }
+      Write-Host "All done"
    }
 # $Definition = Get-Content Function:\CreateUser -ErrorAction Stop
    <#
@@ -270,7 +273,7 @@ if ($badblood -eq 'badblood') {
    $I++
    $AllUsers = Get-aduser -Filter *
    Write-Progress -Activity "Random Stuff into A domain - Creating Groups" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
-   write-host "Creating Groups on Domain" -ForegroundColor Green
+   Write-Host "Creating Groups on Domain" -ForegroundColor Green
 
    $x = 1
    .($basescriptPath + '\AD_Groups_Create\CreateGroup.ps1')
@@ -321,7 +324,7 @@ if ($badblood -eq 'badblood') {
    $LocalGroupList = Get-ADGroup -Filter { GroupScope -eq "domainlocal" } -Properties isCriticalSystemObject
 
    #Computer Creation Time
-   write-host "Creating Computers on Domain" -ForegroundColor Green
+   Write-Host "Creating Computers on Domain" -ForegroundColor Green
    $I++
    $X = 1
    $Jobs = @()
