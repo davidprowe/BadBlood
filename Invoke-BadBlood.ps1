@@ -203,7 +203,7 @@ if ($badblood -eq 'badblood') {
    .($basescriptpath + '\AD_Attack_Vectors\ASREP_NotReqPreAuth.ps1')
    ADREP_NotReqPreAuth -UserList $ASREPUsers
    
-   if ($PSBoundParameters.ContainsKey('SkipOuCreation') -eq $false) {
+   if ($PSBoundParameters.ContainsKey('WeakPasswords')) {
       write-host "Adding Weak User Passwords for a few users" -ForegroundColor Green
       Write-Progress -Activity "Adding Weak User Passwords" -Status "Progress:" -PercentComplete ($i / $totalscripts * 100)
       # get .05 percent of the all users output and asrep them
