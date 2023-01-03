@@ -156,7 +156,7 @@ if ($badblood -eq 'badblood') {
    $I++
    do {
       Write-Progress -Activity "Random Stuff into A domain - Creating $ComputerCount computers" -Status "Progress:" -PercentComplete ($x / $ComputerCount * 100)
-      createcomputer
+      createcomputer -Domain $Domain -OUList $ousAll -ScriptDir $createuserscriptpath
       $x++
    }while ($x -lt $ComputerCount)
    $Complist = get-adcomputer -filter *
