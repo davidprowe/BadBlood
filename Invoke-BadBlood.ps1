@@ -28,7 +28,7 @@ param
    [Int32]$UserCount = 2500,
    [Parameter(Mandatory = $false,
       Position = 2,
-      HelpMessage = 'Supply a count for user creation default 500')]
+      HelpMessage = 'Supply a count for group creation default 500')]
    [int32]$GroupCount = 500,
    [Parameter(Mandatory = $false,
       Position = 3,
