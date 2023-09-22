@@ -28,11 +28,11 @@ param
    [Int32]$UserCount = 2500,
    [Parameter(Mandatory = $false,
       Position = 2,
-      HelpMessage = 'Supply a count for user creation default 500')]
+      HelpMessage = 'Supply a count for group creation default 500')]
    [int32]$GroupCount = 500,
    [Parameter(Mandatory = $false,
       Position = 3,
-      HelpMessage = 'Supply the script directory for where this script is stored')]
+      HelpMessage = 'Supply a count for computer creation default 100')]
    [int32]$ComputerCount = 100,
    [Parameter(Mandatory = $false,
       Position = 4,
